@@ -9,10 +9,10 @@ import com.tlglearning.concurrency.RaceCondition;
 import com.tlglearning.concurrency.Reduction;
 import com.tlglearning.concurrency.SingleThread;
 import java.lang.reflect.Constructor;
+import java.util.Random;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.tlglearning.concurrency.util.Generator;
 
 public class ComputationTest {
 
@@ -56,6 +56,41 @@ public class ComputationTest {
       throws ReflectiveOperationException {
     Constructor<? extends Computation> constructor = implementation.getConstructor();
     return constructor.newInstance();
+  }
+
+  private static final class Generator {
+
+    private final int[] data;
+    private final double arithmeticMean;
+    private final double geometricMean;
+
+    public Generator(long seed, int arrayLength, int upperBound) {
+      long[] sum = new long[1];
+      double[] sumLog = new double[1];
+      Random rng = new Random(seed);
+      data = rng
+          .ints(arrayLength, 1, upperBound)
+          .peek((value) -> {
+            sum[0] += value;
+            sumLog[0] += Math.log(value);
+          })
+          .toArray();
+      arithmeticMean = sum[0] / (double) arrayLength;
+      geometricMean = Math.exp(sumLog[0] / arrayLength);
+    }
+
+    public int[] data() {
+      return data;
+    }
+
+    public double arithmeticMean() {
+      return arithmeticMean;
+    }
+
+    public double geometricMean() {
+      return geometricMean;
+    }
+
   }
 
 }
